@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDK</title>
+    <script src="js/three145.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script>
+        window.addEventListener('load', () => {
+            const scene = new THREE.Scene();
+            const proportions = window.innerWidth / window.innerHeight;
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                proportions,
+                0.1,
+                10000
+            );
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(0xffffff);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.querySelector("#root").appendChild( renderer.domElement );
+            
+            camera.position.set(200,100,200)
+            camera.lookAt(scene.position)
+            
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+            
+            render = () => {
+                requestAnimationFrame(render);
+                console.log('render leci');
+                renderer.render(scene, camera);
+            }
+
+            render();
+        });
+    </script>
+</head>
+<body>
+    <div class="title">
+        <h2 style="color: lime">oś Y</h2>
+        <h2 style="color: red">oś X</h2>
+        <h2 style="color: blue">oś Z</h2>
+    </div>
+    <div id="root">
+    </div>
+</body>
+</html>

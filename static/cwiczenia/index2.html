@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDK</title>
+    <script src="js/three145.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script>
+        window.addEventListener('load', () => {
+            const fovElement = document.querySelector('#fov');
+            const spanElement = document.querySelector('#span');
+            let fov = 90;
+            fovElement.value = fov;
+            spanElement.innerText = `${fov}fov`;
+            fovElement.addEventListener('input', (e) => {
+                fov = e.target.value;
+                spanElement.innerText = `${fov}fov`;
+            });
+
+            const scene = new THREE.Scene();
+            const proportions = window.innerWidth / window.innerHeight;
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                proportions,
+                0.1,
+                10000
+            );
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(0xffffff);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.querySelector("#root").appendChild( renderer.domElement );
+            
+            camera.position.set(200,100,200)
+            camera.lookAt(scene.position)
+            
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+            const cubeGeometry = new THREE.BoxGeometry(100, 100, 100);
+            const cubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff8877,
+                side: THREE.DoubleSide,
+                wirefame: false,
+                transparent: true,
+                opacity: 0.5
+            });
+            const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            scene.add(cube);
+                        
+            render = () => {
+                requestAnimationFrame(render);
+                cube.rotation.y += 0.01;
+
+                camera.fov = fov;
+                camera.updateProjectionMatrix();
+                
+                renderer.render(scene, camera);
+            }
+
+            render();
+        });
+    </script>
+</head>
+<body>
+    <div class="title">
+        <input type="range" name="fov" id="fov" min="0" max="120">
+        <span id="span" style="border: 1px solid red; color: red; border-radius: 1em; padding: 1em;"></span>
+    </div>
+    <div id="root">
+    </div>
+</body>
+</html>

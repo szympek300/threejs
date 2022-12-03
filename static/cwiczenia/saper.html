@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>IDK</title>
+    <script src="js/three145.js"></script>
+    <link href="css/style.css" rel="stylesheet">
+
+    <script>
+        window.addEventListener('load', () => {
+            //inicjalizacja sceny
+            const size = {x: 10, y: 10, z: 10};
+            const cubeSize = 100;
+            const amount = 10;
+            const scene = new THREE.Scene();
+            const proportions = window.innerWidth / window.innerHeight;
+            const bombs = [];
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                proportions,
+                0.1,
+                10000
+            );
+
+
+            //inicjalizacja renderera
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(0xffffff);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.querySelector("#root").appendChild(renderer.domElement);
+
+            camera.position.set(500, 0, 500)
+            camera.lookAt(scene.position)
+            camera.fov = 90;
+            camera.updateProjectionMatrix();
+
+            //inicjalizacja osi
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+
+            //inicjalizacja siatki sapera
+            let cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+            const bigCubeGeometry = new THREE.BoxGeometry(0, 0, 0);
+            const bigCube = new THREE.Mesh(bigCubeGeometry);
+            scene.attach(bigCube);
+            bigCube.position.set(size.x * cubeSize * 1.2 / 2, size.y * cubeSize * 1.2 / 2, size.z * cubeSize * 1.2 / 2);
+            const cubes = [];
+            for (let x = 0; x < size.x; x++) for (let y = 0; y < size.y; y++) for (let z = 0; z < size.z; z++) {
+                let cubeMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x000000,
+                    side: THREE.doubleSided,
+                    wireframe: false,
+                    transparent: true,
+                    opacity: 0.5
+                });
+                const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.name = `${x}_${y}_${z}`;
+                cube.translateX(x * cubeSize * 1.2);
+                cube.translateY(y * cubeSize * 1.2);
+                cube.translateZ(z * cubeSize * 1.2);
+                scene.add(cube);
+                cubes.push(cube);
+                bigCube.attach(cube);
+            }
+
+
+            //skalowanie siatki
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            });
+
+
+            //klikanie obiektów
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            const click = (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                if (intersects.length > 0) {
+                    const intersected = intersects[0].object;
+                    console.log(intersected.name);
+                    intersected.material.color.set(0xff0000);
+                }
+            }
+            const rightClick = (e) => {
+                e.preventDefault();
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+                if (intersects.length > 0) {
+                    const intersected = intersects[0].object;
+                    console.log(intersected.name);
+                    if (intersected.material.color.getHex() === 0x000000) {
+                        intersected.material.color.set(0x00ff00);
+                    } else if (intersected.material.color.getHex() === 0x00ff00) {
+                        intersected.material.color.set(0x000000);
+                    }
+                }
+            }
+            window.addEventListener('click', click);
+            window.addEventListener('contextmenu', rightClick);
+
+
+            //funkcja renderująca
+            const render = () => {
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+
+                console.log("Number of Triangles :", renderer.info.render.triangles); //log number of triangles
+
+                //rotate
+                // bigCube.rotation.x += 0.01;
+            }
+
+            render();
+
+
+            // movement
+            const keyPressed = {};
+            window.addEventListener('keydown', (e) => {
+                keyPressed[e.key] = true;
+            });
+            window.addEventListener('keyup', (e) => {
+                keyPressed[e.key] = false;
+            });
+            const move = () => {
+                if (keyPressed['w']) {
+                    camera.translateZ(-10);
+                }
+                if (keyPressed['s']) {
+                    camera.translateZ(10);
+                }
+                if (keyPressed['a']) {
+                    camera.translateX(-10);
+                }
+                if (keyPressed['d']) {
+                    camera.translateX(10);
+                }
+                if (keyPressed['e']) {
+                    camera.translateY(10);
+                }
+                if (keyPressed['q']) {
+                    camera.translateY(-10);
+                }
+                if (keyPressed['r']) {
+                    camera.position.set(500, 100, 500)
+                    camera.lookAt(scene.position)
+                }
+                if (keyPressed['ArrowUp']) {
+                    camera.rotateX(0.02);
+                }
+                if (keyPressed['ArrowDown']) {
+                    camera.rotateX(-0.02);
+                }
+                if (keyPressed['ArrowLeft']) {
+                    camera.rotateY(0.02);
+                }
+                if (keyPressed['ArrowRight']) {
+                    camera.rotateY(-0.02);
+                }
+                if (keyPressed['z']) {
+                    camera.rotateZ(0.02);
+                }
+                if (keyPressed['x']) {
+                    camera.rotateZ(-0.02);
+                }
+            }
+            setInterval(move, 10);
+
+
+            //generowanie bomb
+            for (let i = 0; i < amount; i++) {
+                let x, y, z;
+                do {
+                    x = Math.floor(Math.random() * size.x);
+                    y = Math.floor(Math.random() * size.y);
+                    z = Math.floor(Math.random() * size.z);
+                } while (bombs.includes(`${x}_${y}_${z}`));
+                bombs.push(`${x}_${y}_${z}`);
+            }
+        });
+    </script>
+</head>
+<body>
+<div class="title">
+</div>
+<div id="root">
+</div>
+</body>
+</html>

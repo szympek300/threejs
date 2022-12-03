@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDK</title>
+    <script src="js/three145.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script>
+        window.addEventListener('load', () => {
+            const buttons = document.querySelectorAll('.button');
+            const meshes = [false, false, false, false];
+            const scene = new THREE.Scene();
+            const proportions = window.innerWidth / window.innerHeight;
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                proportions,
+                0.1,
+                10000
+            );
+            const mat = new THREE.LineBasicMaterial({color: 0xFF8877, linewidth: 1});
+
+            const cubeGeometry = new THREE.BoxGeometry(100, 100, 100);
+            const cubeGeo = new THREE.WireframeGeometry(cubeGeometry);
+            const cubeWireframe = new THREE.LineSegments(cubeGeo, mat);
+            buttons[0].addEventListener('click', () => { 
+                meshes[0] = !meshes[0];
+                if (meshes[0]) return scene.add(cubeWireframe);
+                scene.remove(cubeWireframe);
+            });
+
+            const sphereGeometry = new THREE.SphereGeometry(100);
+            const sphereGeo = new THREE.WireframeGeometry(sphereGeometry);
+            const sphereWireframe = new THREE.LineSegments(sphereGeo, mat);
+            buttons[1].addEventListener('click', () => { 
+                console.log(meshes[1]);
+                meshes[1] = !meshes[1];
+                console.log(meshes[1]);
+                if (meshes[1]) return scene.add(sphereWireframe);
+                scene.remove(sphereWireframe);
+            });
+
+            const cylinderGeometry = new THREE.CylinderGeometry(100, 100, 150, 100);
+            const cylinderGeo = new THREE.WireframeGeometry( cylinderGeometry );
+            const cylinderWireframe = new THREE.LineSegments( cylinderGeo, mat );
+            buttons[2].addEventListener('click', () => { 
+                meshes[2] = !meshes[2];
+                if (meshes[2]) return scene.add(cylinderWireframe);
+                scene.remove(cylinderWireframe);
+            });
+
+
+            const coneGeometry = new THREE.ConeGeometry(100, 100, 20);
+            const coneGeo = new THREE.WireframeGeometry( coneGeometry );
+            const coneWireframe = new THREE.LineSegments( coneGeo, mat );
+            buttons[3].addEventListener('click', () => {
+                meshes[3] = !meshes[3];
+                if (meshes[3]) return scene.add(coneWireframe);
+                scene.remove(coneWireframe);
+            });
+
+
+
+
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(0xffffff);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.querySelector("#root").appendChild( renderer.domElement );
+            
+            camera.position.set(0,0,200)
+            camera.lookAt(scene.position)
+            
+            const axes = new THREE.AxesHelper(1000)
+            scene.add(axes)
+
+                        
+            render = () => {
+                requestAnimationFrame(render);
+
+                renderer.render(scene, camera);
+            }
+
+            render();
+        });
+    </script>
+    <style>
+        .button, #info {
+            padding: 0.5em;
+            border: 1px solid black;
+            border-radius: 1em;
+            margin: 0.5em;
+            opacity: 0.3;
+        }
+        .button {
+            display: inline-block;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <div class="button">BOX</div>
+        <div class="button">SPHERE</div>
+        <div class="button">CYLINDER</div>
+        <div class="button">CONE</div>
+        <div id="info">niewiem</div>
+    </div>
+    <div id="root">
+    </div>
+</body>
+</html>
