@@ -25,6 +25,17 @@
                 10000
             );
 
+            //generowanie bomb
+            for (let i = 0; i < amount; i++) {
+                let x, y, z;
+                do {
+                    x = Math.floor(Math.random() * size.x);
+                    y = Math.floor(Math.random() * size.y);
+                    z = Math.floor(Math.random() * size.z);
+                } while (bombs.find(bomb => bomb.x === x && bomb.y === y && bomb.z === z));
+                bombs.push({x, y, z});
+            }
+
 
             //inicjalizacja renderera
             const renderer = new THREE.WebGLRenderer();
@@ -87,9 +98,23 @@
                 const intersects = raycaster.intersectObjects(scene.children, true);
                 if (intersects.length > 0) {
                     const intersected = intersects[0].object;
-                    console.log(intersected.name);
-                    intersected.material.color.set(0xff0000);
-                    intersected.material.opacity = 0.1;
+                    const [x, y, z] = intersected.name.split('_').map(Number);
+                    const bomb = bombs.find(bomb => bomb.x === x && bomb.y === y && bomb.z === z);
+                    if (bomb) {
+                        console.table(bombs);
+                        bombs.forEach(bomb => {
+                            const cube = cubes.find(cube => cube.name === `${bomb.x}_${bomb.y}_${bomb.z}`);
+                            cube.material.color.set(0xff0000);
+                            cube.material.opacity = 0.7;
+                        });
+                        intersected.material.opacity = 1;
+                        alert('BOOM!');
+                    } else {
+                        intersected.material.color.set(0x000000);
+                        intersected.material.wireframe = true;
+                        intersected.material.opacity = 1;
+                        intersected.material.transparent = false;
+                    }
                 }
             }
             const rightClick = (e) => {
@@ -100,7 +125,6 @@
                 const intersects = raycaster.intersectObjects(scene.children, true);
                 if (intersects.length > 0) {
                     const intersected = intersects[0].object;
-                    console.log(intersected.name);
                     if (intersected.material.color.getHex() === 0x000000) {
                         intersected.material.color.set(0x00ff00);
                         intersected.material.opacity = 0.1;
@@ -179,18 +203,6 @@
                 }
             }
             setInterval(move, 10);
-
-
-            //generowanie bomb
-            for (let i = 0; i < amount; i++) {
-                let x, y, z;
-                do {
-                    x = Math.floor(Math.random() * size.x);
-                    y = Math.floor(Math.random() * size.y);
-                    z = Math.floor(Math.random() * size.z);
-                } while (bombs.includes(`${x}_${y}_${z}`));
-                bombs.push(`${x}_${y}_${z}`);
-            }
         });
     </script>
 </head>
