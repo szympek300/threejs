@@ -11,9 +11,10 @@
     <script>
         window.addEventListener('load', () => {
             //inicjalizacja sceny
-            const size = {x: 10, y: 10, z: 10};
+            const size = {x: 3, y: 3, z: 4};
             const cubeSize = 100;
             const amount = 10;
+            const gap = 1.2;
             const scene = new THREE.Scene();
             const proportions = window.innerWidth / window.innerHeight;
             const bombs = [];
@@ -31,7 +32,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.querySelector("#root").appendChild(renderer.domElement);
 
-            camera.position.set(500, 0, 500)
+            camera.position.set(1000, 0, 1000)
             camera.lookAt(scene.position)
             camera.fov = 90;
             camera.updateProjectionMatrix();
@@ -47,7 +48,7 @@
             const bigCubeGeometry = new THREE.BoxGeometry(0, 0, 0);
             const bigCube = new THREE.Mesh(bigCubeGeometry);
             scene.attach(bigCube);
-            bigCube.position.set(size.x * cubeSize * 1.2 / 2, size.y * cubeSize * 1.2 / 2, size.z * cubeSize * 1.2 / 2);
+            bigCube.position.set(size.x * cubeSize * gap / 2, size.y * cubeSize * gap / 2, size.z * cubeSize * gap / 2);
             const cubes = [];
             for (let x = 0; x < size.x; x++) for (let y = 0; y < size.y; y++) for (let z = 0; z < size.z; z++) {
                 let cubeMaterial = new THREE.MeshBasicMaterial({
@@ -55,13 +56,13 @@
                     side: THREE.doubleSided,
                     wireframe: false,
                     transparent: true,
-                    opacity: 0.5
+                    opacity: 0.9
                 });
                 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                 cube.name = `${x}_${y}_${z}`;
-                cube.translateX(x * cubeSize * 1.2);
-                cube.translateY(y * cubeSize * 1.2);
-                cube.translateZ(z * cubeSize * 1.2);
+                cube.translateX(x * cubeSize * gap);
+                cube.translateY(y * cubeSize * gap);
+                cube.translateZ(z * cubeSize * gap);
                 scene.add(cube);
                 cubes.push(cube);
                 bigCube.attach(cube);
@@ -88,6 +89,7 @@
                     const intersected = intersects[0].object;
                     console.log(intersected.name);
                     intersected.material.color.set(0xff0000);
+                    intersected.material.opacity = 0.1;
                 }
             }
             const rightClick = (e) => {
@@ -101,8 +103,10 @@
                     console.log(intersected.name);
                     if (intersected.material.color.getHex() === 0x000000) {
                         intersected.material.color.set(0x00ff00);
+                        intersected.material.opacity = 0.1;
                     } else if (intersected.material.color.getHex() === 0x00ff00) {
                         intersected.material.color.set(0x000000);
+                        intersected.material.opacity = 1;
                     }
                 }
             }
