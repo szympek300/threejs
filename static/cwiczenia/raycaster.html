@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDK</title>
+    <script src="js/three145.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+            window.addEventListener('load', () => {
+                const raycaster = new THREE.Raycaster();
+                const mouseVector = new THREE.Vector2();
+                let selectedCube = null;
+                const cameraControl = {up: false, down: false, left: false, right: false};
+                const cubeControl = {x: 0, y: 0, z: 0};
+                document.addEventListener("keyup", (e) => {
+                    if (selectedCube === null) {
+                        switch (e.key) {
+                            case 'ArrowUp': {
+                                cameraControl.up = false;
+                            } break;
+                            case 'ArrowDown': {
+                                cameraControl.down = false;
+                            } break;
+                            case 'ArrowLeft': {
+                                cameraControl.left = false;
+                            } break;
+                            case 'ArrowRight': {
+                                cameraControl.right = false;
+                            } break;
+                        }
+                        return;
+                    }
+                    switch (e.key) {
+                        case 'ArrowUp': {
+                            cubeControl.y = 0;
+                        } break;
+                        case 'ArrowDown': {
+                            cubeControl.y = 0;
+                        } break;
+                        case 'ArrowLeft': {
+                            cubeControl.z = 0;
+                        } break;
+                        case 'ArrowRight': {
+                            cubeControl.z = 0;
+                        } break;
+                        case 'z': {
+                            cubeControl.x = 0
+                        } break;
+                        case 'x': {
+                            cubeControl.x = 0;
+                        }
+                    }
+
+                });
+                document.addEventListener("keydown", (e) => {
+                    if (e.key === 'Escape') {
+                        cubes[selectedCube].material.opacity = 0.1;
+                        selectedCube = null;
+                        cameraControl.up = cameraControl.down = cameraControl.left = cameraControl.right = false;
+                        cubeControl.up = cubeControl.down = cubeControl.left = cubeControl.right = false;
+                        return;
+                    }
+                    if (selectedCube === null) {
+                        //obracanie kamery
+                        switch (e.key) {
+                            case 'ArrowUp': {
+                                cameraControl.up = true;
+                            } break;
+                            case 'ArrowDown': {
+                                cameraControl.down = true;
+                            } break;
+                            case 'ArrowLeft': {
+                                cameraControl.left = true;
+                            } break;
+                            case 'ArrowRight': {
+                                cameraControl.right = true;
+                            } break;
+                        }
+                        return
+                    }
+                    switch (e.key) {
+                        case 'ArrowUp': {
+                            cubeControl.y = 1;
+                        } break;
+                        case 'ArrowDown': {
+                            cubeControl.y = -1;
+                        } break;
+                        case 'ArrowLeft': {
+                            cubeControl.z = 1;
+                        } break;
+                        case 'ArrowRight': {
+                            cubeControl.z = -1;
+                        } break;
+                        case 'z': {
+                            cubeControl.x = 1;
+                        } break;
+                        case 'x': {
+                            cubeControl.x = -1;
+                        } break;
+                    }
+                });
+                document.addEventListener("mousedown", (e) => {
+                    mouseVector.x = (e.clientX / window.innerWidth) * 2 - 1;
+                    mouseVector.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                    raycaster.setFromCamera(mouseVector, camera);
+                    const intersects = raycaster.intersectObjects(scene.children);
+                    if (intersects.length > 0) {
+                        if (selectedCube !== null) return;
+                        const {id} = intersects[0].object.userData;
+                        selectedCube = id;
+                        cubes[selectedCube].material.opacity = 1;
+                        cameraControl.up = cameraControl.down = cameraControl.left = cameraControl.right = false;
+                        cubeControl.up = cubeControl.down = cubeControl.left = cubeControl.right = false;
+                    }
+                });
+                const scene = new THREE.Scene();
+                const proportions = window.innerWidth / window.innerHeight;
+                const camera = new THREE.PerspectiveCamera(
+                    45,
+                    proportions,
+                    0.1,
+                    10000
+                );
+
+                const cubeGeometry = new THREE.BoxGeometry(256, 256, 256);
+                const cubes = [];
+                for (let i = 0; i < 4; i++) {
+                    const material = new THREE.MeshBasicMaterial({
+                        side: THREE.DoubleSide, // dwustronny
+                        map: new THREE.TextureLoader().load('mats/tekstura.jpg') , // plik tekstury
+                        transparent: true, // przezroczysty / nie
+                        opacity: 0.8, // stopień przezroczystości
+
+                    });
+                    const cube = new THREE.Mesh(cubeGeometry, material);
+                    scene.add(cube);
+                    cubes.push(cube);
+                    cube.position.y = i * 256;
+                    cube.userData.id = i;
+                    cube.material.opacity = 0.1;
+                }
+
+
+                const renderer = new THREE.WebGLRenderer();
+                renderer.setClearColor(0xffffff);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.querySelector("#root").appendChild( renderer.domElement );
+
+                camera.position.set(1000,700,1000)
+                camera.lookAt(scene.position)
+
+                const axes = new THREE.AxesHelper(1000)
+                scene.add(axes)
+
+
+                let render = () => {
+                    requestAnimationFrame(render);
+
+                    const cube = cubes[selectedCube];
+                    const rotation = cameraControl.left - cameraControl.right;
+                    const movement = cameraControl.up - cameraControl.down;
+                    camera.rotateY(rotation / 90)
+                    camera.position.y += movement * 6;
+
+                    if (cube) {
+                        cube.position.x += cubeControl.x * 6;
+                        cube.position.y += cubeControl.y * 6;
+                        cube.position.z += cubeControl.z * 6;
+                    }
+
+                    renderer.render(scene, camera);
+                }
+
+                render();
+            });
+    </script>
+</head>
+<body>
+    <div id="root">
+
+    </div>
+</body>
+</html>
